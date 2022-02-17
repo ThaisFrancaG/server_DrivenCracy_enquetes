@@ -3,10 +3,7 @@ import dayjs from "dayjs";
 
 export async function sendPool(req, res) {
   const { title, expireAt } = req.body;
-  console.log(title);
-  console.log(expireAt);
 
-  //primeiro, conferir se já tem outra pool com esse mesmo título
   const checkPool = await db.collection("pools").findOne({ title });
 
   if (!!checkPool) {
@@ -20,9 +17,23 @@ export async function sendPool(req, res) {
 
     const completedPool = { title, expireAt: currentTime };
     await db.collection("pools").insertOne(completedPool);
-    return res.status(201).send(`Enquete ${title} foi criada!`);
+    return res.status(201).send(`Enquete "${title}" foi criada!`);
   }
 
   await db.collection("pools").insertOne(pool);
   return res.status(201).send(`Enquete ${title} foi criada!`);
+}
+
+export async function getPool(req, res) {
+  const poolList = await db.collection("pools").find().toArray();
+
+  try {
+    if (poolList.length === 0) {
+      return res.status(204).send("Não tem enquetes cadastradas ainda!");
+    }
+    return res.status(200).send(poolList);
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
+  }
 }
