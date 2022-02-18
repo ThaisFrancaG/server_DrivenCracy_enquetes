@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 
 export async function sendPool(req, res) {
   const { title, expireAt } = req.body;
-
+  const pool = req.body;
   const checkPool = await db.collection("pools").findOne({ title });
 
   if (!!checkPool) {
