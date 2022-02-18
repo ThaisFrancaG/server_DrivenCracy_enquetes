@@ -37,3 +37,11 @@ export async function getPool(req, res) {
     return res.sendStatus(500);
   }
 }
+
+//para pegar com id, precisa adicionar como params dentro do request
+
+export async function getPoolChoices(req, res) {
+  console.log("Chegou na função certa!");
+  const poolId = req.params.id;
+  console.log(poolId);
+}
