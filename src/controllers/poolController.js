@@ -38,10 +38,24 @@ export async function getPool(req, res) {
   }
 }
 
-//para pegar com id, precisa adicionar como params dentro do request
-
 export async function getPoolChoices(req, res) {
-  console.log("Chegou na função certa!");
   const poolId = req.params.id;
-  console.log(poolId);
+  console.log(typeof poolId);
+
+  try {
+    const poolChoices = await db
+      .collection("choices")
+      .find({ poolId: poolId })
+      .toArray();
+
+    console.log(poolChoices);
+    if (poolChoices.length === 0) {
+      return res.status(404).send("Enquete não encontrada");
+    }
+
+    return res.status(200).send(poolChoices);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 }
