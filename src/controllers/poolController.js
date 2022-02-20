@@ -5,24 +5,30 @@ import { ObjectId } from "mongodb";
 export async function sendPool(req, res) {
   const { title, expireAt } = req.body;
   const pool = req.body;
-  const checkPool = await db.collection("pools").findOne({ title });
 
-  if (!!checkPool) {
-    return res
-      .status(409)
-      .send("Já tem uma enquete com esse nome. Tente criar outra");
+  try {
+    const checkPool = await db.collection("pools").findOne({ title });
+
+    if (!!checkPool) {
+      return res
+        .status(409)
+        .send("Já tem uma enquete com esse nome. Tente criar outra");
+    }
+
+    if (!expireAt) {
+      let currentTime = dayjs().add(30, "day").format("YYYY-MM-D hh:mm");
+
+      const completedPool = { title, expireAt: currentTime };
+      await db.collection("pools").insertOne(completedPool);
+      return res.status(201).send(`Enquete "${title}" foi criada!`);
+    }
+
+    await db.collection("pools").insertOne(pool);
+    return res.status(201).send(`Enquete ${title} foi criada!`);
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
   }
-
-  if (!expireAt) {
-    let currentTime = dayjs().add(30, "day").format("YYYY-MM-D hh:mm");
-
-    const completedPool = { title, expireAt: currentTime };
-    await db.collection("pools").insertOne(completedPool);
-    return res.status(201).send(`Enquete "${title}" foi criada!`);
-  }
-
-  await db.collection("pools").insertOne(pool);
-  return res.status(201).send(`Enquete ${title} foi criada!`);
 }
 
 export async function getPool(req, res) {
@@ -41,15 +47,12 @@ export async function getPool(req, res) {
 
 export async function getPoolChoices(req, res) {
   const poolId = req.params.id;
-  console.log(typeof poolId);
 
   try {
     const poolChoices = await db
       .collection("choices")
       .find({ poolId: poolId })
       .toArray();
-
-    console.log(poolChoices);
     if (poolChoices.length === 0) {
       return res.status(404).send("Enquete não encontrada");
     }
@@ -98,22 +101,19 @@ export async function getPoolResults(req, res) {
         title: [checkRepetition[0].title, checkRepetition[1].title],
         votes: [checkRepetition[0].votes, checkRepetition[1].votes],
       };
-      //isso significa que tem mais de uma opção com o mesmo número de votos
-      console.log(checkRepetition);
     }
 
     if (checkRepetition.length > 2) {
-      return res.send(
-        "No momento, tem mais de 2 opções com os mesmos resultados! Dessa forma, os resultados da enquete estão em aberto e, possivelmente, em análise"
-      );
+      return res
+        .status(207)
+        .send(
+          "No momento, tem mais de 2 opções com os mesmos resultados! Portanto, os resultados estão em análise e não podem ser imediatamente divulgados"
+        );
     }
-    console.log(result);
 
     const pool = await db
       .collection("pools")
       .findOne({ _id: ObjectId(poolId) });
-    console.log("a pool em questão");
-    console.log(pool);
     const poolResults = { ...pool, result };
 
     return res.status(200).send(poolResults);

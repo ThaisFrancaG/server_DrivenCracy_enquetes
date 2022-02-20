@@ -7,7 +7,7 @@ export async function sendChoice(req, res) {
   const choice = req.body;
   try {
     const searchId = ObjectId(poolId);
-    //essa parte está certa?
+
     const currentPool = await db.collection("pools").findOne({ _id: searchId });
 
     if (!currentPool) {

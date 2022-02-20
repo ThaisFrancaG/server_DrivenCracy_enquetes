@@ -6,4 +6,5 @@ const choiceRouter = Router();
 
 choiceRouter.post("/choice", choiceValidate, sendChoice);
 choiceRouter.post("/choice/:id/vote", addVote);
+
 export default choiceRouter;
