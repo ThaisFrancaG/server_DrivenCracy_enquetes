@@ -89,21 +89,21 @@ export async function getPoolResults(req, res) {
       .find({ votes: votesNumber })
       .toArray();
     let result = {};
-    if (checkRepetition === 1) {
+    if (checkRepetition.length === 1) {
       result = {
         title: votesName,
         votes: votesNumber,
       };
     }
 
-    if (checkRepetition.length > 1 && checkRepetition.length <= 2) {
+    if (checkRepetition.length > 1 && checkRepetition.length < 3) {
       result = {
         title: [checkRepetition[0].title, checkRepetition[1].title],
         votes: [checkRepetition[0].votes, checkRepetition[1].votes],
       };
     }
 
-    if (checkRepetition.length > 2) {
+    if (checkRepetition.length >= 3) {
       return res
         .status(207)
         .send(
