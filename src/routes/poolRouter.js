@@ -12,7 +12,7 @@ poolRouter.post("/pool", validatePool, sendPool);
 
 poolRouter.get("/pool", getPool);
 
-poolRouter.get("/pool/choice/:id", getPoolChoices);
+poolRouter.get("/pool/:id/choice/", getPoolChoices);
 
 poolRouter.get("/pool/:id/result", getPoolResults);
 
